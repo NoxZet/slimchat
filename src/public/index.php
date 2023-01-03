@@ -9,6 +9,7 @@ if (!$pdo) {
 
 require '../vendor/autoload.php';
 
+// Display errors - if used in production, detect here if we're in production environment
 $config = new \Slim\Container([
     'settings' => [
         'displayErrorDetails' => true,
