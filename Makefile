@@ -1,12 +1,7 @@
 SHELL := /bin/bash
 
-config:
-	echo "UID=$(shell id -u)" > ".env"
-	cp "src/.env.example" "src/.env"
-
 init:
 	docker exec slimchat_php "composer" "install"
-#	docker exec slimchat_php "php" "bin/console" "doctrine:database:create"
 
 docker-up:
 	docker-compose up -d
