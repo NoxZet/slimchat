@@ -35,5 +35,6 @@ class User extends BaseEntity {
 		$statement = $pdo->prepare('UPDATE users SET `token` = :token WHERE `username` = :username');
 		$statement->bindValue(':token', $this->token);
 		$statement->bindValue(':username', $this->username);
+		$statement->execute();
 	}
 }
