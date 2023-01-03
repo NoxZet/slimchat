@@ -24,6 +24,28 @@ class Router {
 			return $response;
 		});
 
+		$this->slimApp->get('/user/{username}', function (Request $request, Response $response, array $args) use ($self) {
+			// Verify the request contents syntactically
+			$body = $request->getParsedBody();
+			if (isset($args['username'])) {
+				$username = $args['username'];
+				// Verify the user exists
+				$user = $self->database->getUser($username);
+				if ($user) {
+					// Return public data about the user (only the name)
+					$response->getBody()->write(json_encode([
+						'username' => $user->getUsername(),
+					]));
+				} else {
+					return $response->withStatus(404);
+				}
+			} else {
+				return $response->withStatus(400);
+			}
+
+			return $response;
+		});
+
 		$this->slimApp->post('/user/{username}/token', function (Request $request, Response $response, array $args) use ($self) {
 			// Verify the request contents syntactically
 			$body = $request->getParsedBody();
