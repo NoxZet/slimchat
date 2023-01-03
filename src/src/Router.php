@@ -18,7 +18,36 @@ class Router {
 					$body['username'], password_hash($body['password'], PASSWORD_DEFAULT)
 				));
 			} else {
-				$response->withStatus(400);
+				return $response->withStatus(400);
+			}
+
+			return $response;
+		});
+
+		$this->slimApp->post('/user/{username}/token', function (Request $request, Response $response, array $args) use ($self) {
+			// Verify the request contents syntactically
+			$body = $request->getParsedBody();
+			if (is_array($body) && isset($args['username']) && isset($body['password'])) {
+				$username = $args['username'];
+				// Verify the user exists
+				$user = $self->database->getUser($username);
+				if ($user) {
+					// Check the password against the retrieved User entity
+					if (password_verify($body['password'], $user->getPassword())) {
+						// Create a token and save it on the entity
+						$token = bin2hex(random_bytes(32));
+						$user->setToken($token);
+						$response->getBody()->write(json_encode([
+							'token' => $token,
+						]));
+					} else {
+						return $response->withStatus(401);
+					}
+				} else {
+					return $response->withStatus(404);
+				}
+			} else {
+				return $response->withStatus(400);
 			}
 
 			return $response;
