@@ -11,7 +11,7 @@ class Router {
 
 	protected function createRoutes() {
 		$self = $this;
-		$this->slimApp->post('/user', function (Request $request, Response $response, array $args) use ($self) {
+		$this->slimApp->post('/users', function (Request $request, Response $response, array $args) use ($self) {
 			$body = $request->getParsedBody();
 			if (is_array($body) && isset($body['username']) && isset($body['password'])) {
 				$self->database->persist(new Entity\User(
@@ -24,7 +24,7 @@ class Router {
 			return $response;
 		});
 
-		$this->slimApp->get('/user/{username}', function (Request $request, Response $response, array $args) use ($self) {
+		$this->slimApp->get('/users/{username}', function (Request $request, Response $response, array $args) use ($self) {
 			// Verify the request contents syntactically
 			$body = $request->getParsedBody();
 			if (isset($args['username'])) {
@@ -46,7 +46,7 @@ class Router {
 			return $response;
 		});
 
-		$this->slimApp->post('/user/{username}/token', function (Request $request, Response $response, array $args) use ($self) {
+		$this->slimApp->post('/users/{username}/token', function (Request $request, Response $response, array $args) use ($self) {
 			// Verify the request contents semantically
 			$body = $request->getParsedBody();
 			if (is_array($body) && isset($args['username']) && isset($body['password'])) {
