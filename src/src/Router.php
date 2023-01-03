@@ -95,5 +95,44 @@ class Router {
 
 			return $response;
 		});
+
+		$this->slimApp->get('/messages/{id}', function (Request $request, Response $response, array $args) use ($self) {
+			// Verify the request contents syntactically
+			$body = $request->getParsedBody();
+			if (isset($args['id']) && ctype_digit($args['id'])) {
+				// Get the message
+				$message = $self->database->getMessage((int)$args['id']);
+				if ($message) {
+					// Return public data about the message
+					$response->getBody()->write(json_encode([
+						'id' => $message->getId(),
+						'author' => $message->getAuthor(),
+						'content' => $message->getContent(),
+					]));
+				} else {
+					return $response->withStatus(404);
+				}
+			} else {
+				return $response->withStatus(400);
+			}
+
+			return $response;
+		});
+
+		$this->slimApp->get('/messages', function (Request $request, Response $response, array $args) use ($self) {
+			// Verify the request contents syntactically
+			$body = $request->getParsedBody();
+			$messages = $self->database->getMessages((int)$request->getQueryParam('limit', 5), (int)$request->getQueryParam('offset', 0));
+			// Return public data for every message
+			$response->getBody()->write(json_encode(array_map(function ($message) {
+				return [
+					'id' => $message->getId(),
+					'author' => $message->getAuthor(),
+					'content' => $message->getContent(),
+				];
+			}, $messages)));
+
+			return $response;
+		});
 	}
 }

@@ -57,4 +57,33 @@ class Database {
 		$result = $statement->fetch(PDO::FETCH_ASSOC);
 		return $this->bindUser($result);
 	}
+
+	protected function bindMessage(array|bool $result) {
+		if ($result === false) {
+			return null;
+		} else {
+			return new Entity\Message($result['id'], $result['author'], $result['content']);
+		}
+	}
+
+	public function getMessage(int $id = null) {
+		$statement = $this->pdo->prepare('SELECT `id`, `author`, `content` FROM messages WHERE `id` = :id');
+		$statement->bindValue(':id', $id);
+		$statement->execute();
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+		return $this->bindMessage($result);
+	}
+
+	public function getMessages(int $count = 5, int $offset = 0) {
+		if ($count > 10) {
+			$count = 10;
+		}
+		$statement = $this->pdo->prepare('SELECT `id`, `author`, `content` FROM messages ORDER BY `id` DESC LIMIT ' . $count . ' OFFSET ' . $offset);
+		$statement->execute();
+		$result = [];
+		foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+			$result[] = $this->bindMessage($row);
+		}
+		return $result;
+	}
 }
