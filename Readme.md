@@ -5,7 +5,6 @@ To run application, you must have docker and docker-compose installed
 For initial setup and project (docker) start, run
 
 ```
-make config
 make docker-up
 make init
 ```
@@ -74,7 +73,7 @@ Retrieves the message with the given id. Returns it as a JSON object with id, au
 
 - POST http://localhost/messages
 
-- Header: `Authentication: <token returned by the previous call>`
+- Header: `Authorization: <token returned by the previous call>`
 
 - JSON body `{"content": "This is a test message"}`
 
