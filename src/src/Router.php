@@ -47,7 +47,7 @@ class Router {
 		});
 
 		$this->slimApp->post('/user/{username}/token', function (Request $request, Response $response, array $args) use ($self) {
-			// Verify the request contents syntactically
+			// Verify the request contents semantically
 			$body = $request->getParsedBody();
 			if (is_array($body) && isset($args['username']) && isset($body['password'])) {
 				$username = $args['username'];
@@ -58,7 +58,7 @@ class Router {
 					if (password_verify($body['password'], $user->getPassword())) {
 						// Create a token and save it on the entity
 						$token = bin2hex(random_bytes(32));
-						$user->setToken($token);
+						$self->database->flush($user->setToken($token));
 						$response->getBody()->write(json_encode([
 							'token' => $token,
 						]));
@@ -67,6 +67,27 @@ class Router {
 					}
 				} else {
 					return $response->withStatus(404);
+				}
+			} else {
+				return $response->withStatus(400);
+			}
+
+			return $response;
+		});
+
+		$this->slimApp->post('/messages', function (Request $request, Response $response, array $args) use ($self) {
+			$body = $request->getParsedBody();
+			$authHeader = $request->getHeader('Authorization');
+			// Verify the request semantically
+			if (count($authHeader) !== 1) {
+				return $response->withStatus(403);
+			} else if (is_array($body) && isset($body['content'])) {
+				// Get user from authorization token
+				$user = $self->database->getUserByToken($authHeader[0]);
+				if ($user) {
+					$self->database->persist(new Entity\Message(null, $user->getUsername(), $body['content']));
+				} else {
+					return $response->withStatus(403);
 				}
 			} else {
 				return $response->withStatus(400);
